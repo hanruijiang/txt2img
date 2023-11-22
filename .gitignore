@@ -1,0 +1,8 @@
+weight/*
+result/*
+input/*
+output/*
+data/*
+.ipynb_checkpoints/
+**/__pycache__
+/
