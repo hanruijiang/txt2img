@@ -3,15 +3,20 @@ import torch
 from tqdm.auto import tqdm
 
 
-def get_score_from_embs(embs, model, batch_size):
+def get_score_from_embs(embs, model, batch_size, preprocess=None):
     
     scores = list()
 
     with torch.no_grad():
 
         for i in tqdm(range(0, len(embs), batch_size), leave=False):
+            
+            x = torch.tensor(embs[i:i+batch_size]).cuda()
+            
+            if preprocess is not None:
+                x = preprocess(x)
 
-            score = model(torch.tensor(embs[i:i+batch_size]).cuda())[..., 0]
+            score = model(x)[..., 0]
 
             scores.append(score.detach().cpu().numpy())
 
@@ -29,9 +34,7 @@ def init_weights(model):
             torch.nn.init.zeros_(m.bias)
             
             
-def log_likelihood(mu, sigma, targets, eps=1e-5, clip=None):
-    
-    sigma2 = sigma ** 2
+def log_likelihood(mu, sigma2, targets, eps=1e-5, clip=None):
     
     loss = (((targets - mu) ** 2) / (sigma2 + eps) + torch.log(sigma2 + eps)) / 2
     
@@ -42,9 +45,9 @@ def log_likelihood(mu, sigma, targets, eps=1e-5, clip=None):
     
     return loss.mean()
 
-def cross_entropy_likelihood(mu, sigma, targets, dim=-1, eps=1e-5, clip=None):
+def cross_entropy_likelihood(mu, sigma2, targets, dim=-1, eps=1e-5, clip=None):
     
-    ex = torch.exp(mu + (sigma ** 2) / 2)
+    ex = torch.exp(mu + sigma2 / 2)
     
     loss = - (mu.gather(dim, targets.unsqueeze(dim)).squeeze(dim) - torch.log(ex.sum(dim=dim) + eps))
     
