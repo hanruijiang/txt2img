@@ -148,14 +148,14 @@ class PromptDataset(torch.utils.data.Dataset):
                 split_indices.append(i)
         split_indices.append(length)
 
-        min_lengths = [20]
+        min_lengths = [40]
         if length > 75:
-            min_lengths.append(40)
-        if length > 150:
             min_lengths.append(60)
+        if length > 150:
+            min_lengths.append(80)
 
         min_length = min_lengths[np.random.randint(len(min_lengths))]
-        max_length = int(min_length * 1.25)
+        max_length = int(min_length * 1.5)
             
         for i, start in enumerate(split_indices[:-1]):
             for end in split_indices[i+1:]:
