@@ -1,7 +1,7 @@
 weight/*
 result/*
-input/*
-output/*
+input
+output
 data/*
 generated/*
 .ipynb_checkpoints/
